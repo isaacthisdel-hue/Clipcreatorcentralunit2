@@ -39,7 +39,7 @@ FRONTEND_LOCAL_URL="http://localhost:${FRONTEND_PORT:-3001}"
 
 if [ -n "${LLM:-}" ]; then
     case "$LLM" in
-        google:*|google-gla:*|openai:*|anthropic:*|ollama:*)
+        google:*|google-gla:*|openai:*|openrouter:*|anthropic:*|ollama:*)
             ;;
         *)
             echo -e "${YELLOW}Warning: Unsupported LLM value '$LLM'${NC}"
@@ -49,7 +49,7 @@ if [ -n "${LLM:-}" ]; then
     esac
 fi
 
-if [ -z "$ASSEMBLY_AI_API_KEY" ]; then
+if [ -z "$ASSEMBLY_AI_API_KEY" ] && [ "${TRANSCRIPTION_PROVIDER:-assemblyai}" = "assemblyai" ]; then
     echo -e "${YELLOW}Warning: ASSEMBLY_AI_API_KEY is not set in .env${NC}"
     echo "Video transcription will not work without this key."
     echo ""

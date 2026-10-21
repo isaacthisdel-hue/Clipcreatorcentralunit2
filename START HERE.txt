@@ -1,0 +1,34 @@
+CLIPCREATOR - HOW TO RUN IT (Mac)
+==================================
+
+This is the full app. It's already set up to use Claude to pick the clips.
+You only need to do 3 things, once:
+
+1) INSTALL DOCKER DESKTOP
+   https://www.docker.com/products/docker-desktop/
+   Pick "Mac with Intel chip". Install it, open it, and wait until it says it's running.
+   In Docker Desktop > Settings > Resources, give it at least 8 GB of memory.
+
+2) GET A CLAUDE API KEY
+   https://console.anthropic.com/  -> sign in -> add a few dollars of credit -> "API Keys" -> Create key.
+   This is NOT your claude.ai subscription; the API is billed separately (a clip job costs cents).
+
+3) PUT THE KEY IN THE .env FILE
+   In Finder, open this folder and press Cmd+Shift+.  (that shows hidden files)
+   Open ".env" with TextEdit. Find the line:
+       ANTHROPIC_API_KEY=PASTE_YOUR_CLAUDE_KEY_HERE
+   Replace PASTE_YOUR_CLAUDE_KEY_HERE with your key (no spaces, no quotes). Save.
+   Never paste this key into a chat or upload .env to GitHub.
+
+THEN: double-click "Start ClipCreator.command".
+   - If macOS blocks it: right-click it > Open > Open.
+   - First start takes 10-20 minutes. Then your browser opens http://localhost:3107
+   - Create an account (it's local, only on your Mac), paste a YouTube link, get clips.
+
+To stop: double-click "Stop ClipCreator.command".
+
+NOTES
+- Transcripts come from the YouTube video's captions (free, fast). If a video has
+  no captions it will fail. Fix: in .env change TRANSCRIPTION_PROVIDER=youtube_captions
+  to TRANSCRIPTION_PROVIDER=whisper (free, runs on your Mac, but slow), then Stop + Start.
+- Rendering video is heavy. On an Intel Mac expect a few minutes per clip job.
