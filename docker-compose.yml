@@ -109,6 +109,7 @@ services:
       - clips:/app/clips
       - ./backend/fonts:/app/fonts
       - ./backend/transitions:/app/transitions
+      - ./handoff:/app/handoff
     environment:
       - PYTHONPATH=/app
       - PYTHONUNBUFFERED=1
@@ -117,6 +118,8 @@ services:
       - POSTHOG_HOST=${POSTHOG_HOST:-https://eu.i.posthog.com}
       - DATABASE_URL=postgresql+asyncpg://supoclip:supoclip_password@postgres:5432/supoclip
       - TEMP_DIR=/app/uploads
+      - HANDOFF_DIR=/app/handoff
+      - HANDOFF_TIMEOUT_SECONDS=${HANDOFF_TIMEOUT_SECONDS:-10000}
       - MEDIA_STORAGE=${MEDIA_STORAGE:-local}
       - MEDIA_S3_BUCKET=${MEDIA_S3_BUCKET:-}
       - MEDIA_S3_PREFIX=${MEDIA_S3_PREFIX:-media}
@@ -281,6 +284,7 @@ services:
       - clips:/app/clips
       - ./backend/fonts:/app/fonts
       - ./backend/transitions:/app/transitions
+      - ./handoff:/app/handoff
     environment:
       - PYTHONPATH=/app
       - PYTHONUNBUFFERED=1
@@ -289,6 +293,8 @@ services:
       - POSTHOG_HOST=${POSTHOG_HOST:-https://eu.i.posthog.com}
       - DATABASE_URL=postgresql+asyncpg://supoclip:supoclip_password@postgres:5432/supoclip
       - TEMP_DIR=/app/uploads
+      - HANDOFF_DIR=/app/handoff
+      - HANDOFF_TIMEOUT_SECONDS=${HANDOFF_TIMEOUT_SECONDS:-10000}
       - MEDIA_STORAGE=${MEDIA_STORAGE:-local}
       - MEDIA_S3_BUCKET=${MEDIA_S3_BUCKET:-}
       - MEDIA_S3_PREFIX=${MEDIA_S3_PREFIX:-media}

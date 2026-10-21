@@ -463,10 +463,17 @@ Find the number of compelling segments requested in the task (usually 2-5) that 
 _transcript_agent: Optional[Agent[None, TranscriptAnalysis]] = None
 _transcript_agent_signature: Optional[tuple[str | None, ...]] = None
 
-SUPPORTED_LLM_PROVIDERS = {"google", "google-gla", "openai", "openrouter", "anthropic", "ollama"}
+SUPPORTED_LLM_PROVIDERS = {"google", "google-gla", "openai", "openrouter", "anthropic", "ollama", "handoff"}
+
+
+def is_handoff_llm(model_name: str | None) -> bool:
+    """``LLM=handoff`` sends clip selection to the shared handoff folder."""
+    return (model_name or "").strip().lower().split(":", 1)[0] == "handoff"
 
 
 def _split_llm_name(model_name: str) -> tuple[str, str | None]:
+    if is_handoff_llm(model_name):
+        return "handoff", "handoff"
     if ":" not in model_name:
         return model_name.strip().lower(), None
 
@@ -1561,12 +1568,36 @@ async def get_most_relevant_parts_by_transcript(
     )
 
     try:
-        agent = get_transcript_agent()
         transcript_lines = _parse_transcript_lines(transcript)
         transcript_spans = _parse_transcript_spans(transcript)
-        windows = split_transcript_into_windows(transcript)
+        handoff = is_handoff_llm(get_config().llm)
+        # Handoff answers read the whole transcript at once, so no windowing.
+        windows = [transcript] if handoff else split_transcript_into_windows(transcript)
+        agent = None if handoff else get_transcript_agent()
 
-        if len(windows) == 1:
+        if handoff:
+            from .handoff import run_handoff_analysis
+
+            source_seconds = max(
+                (line["end_seconds"] for line in transcript_lines), default=0
+            )
+            budget = max_final_clips_for_duration(source_seconds, get_config().max_clips)
+            task_prompt = build_transcript_analysis_prompt(
+                transcript=transcript,
+                include_broll=include_broll,
+                clip_signals=clip_signals,
+                performance_context=performance_context,
+            ).replace("- Choose 2-5 segments total.", f"- Choose up to {budget} segments total, best first.")
+            analyses = [
+                await run_handoff_analysis(
+                    transcript_analysis_system_prompt,
+                    task_prompt,
+                    TranscriptAnalysis,
+                    budget,
+                    source_seconds,
+                )
+            ]
+        elif len(windows) == 1:
             result = await _run_transcript_analysis(
                 agent,
                 build_transcript_analysis_prompt(
